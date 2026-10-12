@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataset Explorer & Creator - Apache 2.0 & MIT</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🔍 Dataset Explorer &amp; Creator</h1>
+        <nav>
+            <button id="btn-list" class="active">📋 Lista Dataset</button>
+            <button id="btn-create">➕ Crea Nuovo</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- ==================== SEZIONE LISTA ==================== -->
+        <section id="list-section" class="active">
+            <h2>📋 Dataset con licenza Apache 2.0 e MIT</h2>
+
+            <div class="filters">
+                <select id="license-filter" aria-label="Filtro licenza">
+                    <option value="apache-2.0,mit">Tutte le licenze</option>
+                    <option value="apache-2.0">Solo Apache 2.0</option>
+                    <option value="mit">Solo MIT</option>
+                </select>
+                <input
+                    type="text"
+                    id="search-input"
+                    placeholder="🔎 Cerca dataset per nome..."
+                    aria-label="Cerca dataset"
+                >
+            </div>
+
+            <div id="dataset-list">
+                <!-- Le card dei dataset vengono caricate via JavaScript -->
+            </div>
+
+            <div id="load-more-container"></div>
+        </section>
+
+        <!-- ==================== SEZIONE CREAZIONE ==================== -->
+        <section id="create-section">
+            <h2>📝 Crea Nuovo Dataset</h2>
+
+            <div class="security-notice">
+                🔐 Per creare un dataset sull'Hub serve un <strong>token Hugging Face con permesso di scrittura</strong>
+                (lo puoi generare su
+                <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">huggingface.co/settings/tokens</a>).
+                Il token viene mantenuto <strong>solo per la durata della sessione</strong> del browser
+                e non viene mai inviato ad altri server oltre a huggingface.co.
+            </div>
+
+            <!-- Scelta modalità -->
+            <div class="creation-mode">
+                <label>
+                    <input type="radio" name="mode" value="inspired" checked>
+                    🔄 Ispirato a dataset esistente
+                </label>
+                <label>
+                    <input type="radio" name="mode" value="scratch">
+                    ✏️ Da zero (definizione manuale)
+                </label>
+            </div>
+
+            <!-- ---------- Form: ispirato a esistente ---------- -->
+            <div id="inspired-form" class="creation-form active">
+                <div class="form-group">
+                    <label for="base-dataset-input">Dataset di base:</label>
+                    <input
+                        type="text"
+                        id="base-dataset-input"
+                        placeholder="Scrivi per cercare tra i dataset caricati..."
+                        autocomplete="off"
+                    >
+                    <div id="base-dataset-suggestions" class="suggestions-box"></div>
+                    <input type="hidden" id="base-dataset" value="">
+                    <p class="hint">💡 Oppure usa il pulsante "🔄 Usa come base" dalle card della lista.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="new-name">Nome nuovo dataset:</label>
+                    <input
+                        type="text"
+                        id="new-name"
+                        placeholder="mio-nuovo-dataset"
+                        required
+                        maxlength="96"
+                    >
+                    <p class="hint">Solo lettere, numeri, punti, trattini e underscore. Max 96 caratteri.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="new-license">Licenza:</label>
+                    <select id="new-license">
+                        <option value="apache-2.0">Apache 2.0</option>
+                        <option value="mit">MIT</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descrizione:</label>
+                    <textarea
+                        id="description"
+                        rows="4"
+                        placeholder="Descrizione del dataset... (max 500 caratteri)"
+                        maxlength="500"
+                    ></textarea>
+                </div>
+
+                <p class="hint">
+                    ⚠️ Il tool crea un <strong>nuovo repository vuoto</strong> ispirato al dataset scelto:
+                    i dati del dataset originale <strong>NON vengono copiati automaticamente</strong>
+                    (rispettando così le licenze originali).
+                </p>
+            </div>
+
+            <!-- ---------- Form: da zero ---------- -->
+            <div id="scratch-form" class="creation-form">
+                <div class="form-group">
+                    <label for="dataset-name">Nome dataset:</label>
+                    <input
+                        type="text"
+                        id="dataset-name"
+                        placeholder="nome-del-dataset"
+                        required
+                        maxlength="96"
+                    >
+                    <p class="hint">Solo lettere, numeri, punti, trattini e underscore. Max 96 caratteri.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="scratch-license">Licenza:</label>
+                    <select id="scratch-license">
+                        <option value="apache-2.0">Apache 2.0</option>
+                        <option value="mit">MIT</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="scratch-description">Descrizione:</label>
+                    <textarea
+                        id="scratch-description"
+                        rows="4"
+                        placeholder="Descrizione del dataset... (max 500 caratteri)"
+                        maxlength="500"
+                    ></textarea>
+                </div>
+
+                <p class="hint">
+                    💡 Il dataset verrà creato come repository vuoto con una dataset card (README.md)
+                    contenente licenza e descrizione. Potrai poi caricare i dati via web, CLI o Python.
+                </p>
+            </div>
+
+            <button id="btn-submit">🚀 Crea Dataset</button>
+
+            <div id="create-status" class="create-status"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            Dataset Explorer &amp; Creator ·
+            <a href="https://huggingface.co/docs/hub/en/datasets" target="_blank" rel="noopener">Documentazione HF Datasets</a> ·
+            Licenze: <a href="https://huggingface.co/datasets?license=license:apache-2.0" target="_blank" rel="noopener">Apache 2.0</a> /
+            <a href="https://huggingface.co/datasets?license=license:mit" target="_blank" rel="noopener">MIT</a>
+        </p>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
